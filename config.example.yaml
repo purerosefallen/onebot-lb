@@ -1,0 +1,6 @@
+bots:
+  - protocol: 'ws'
+    endpoint: 'ws://localhost:6700'
+    selfId: '1111111111'
+    token: 'token'
+routes: []
