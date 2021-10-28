@@ -5,21 +5,8 @@ import { KoishiModule } from 'koishi-nestjs';
 import { BotLoaderService } from './bot-loader/bot-loader.service';
 import { RouteService } from './route/route.service';
 import { OnebotGateway } from './onebot.gateway';
-import { Adapter, Session } from 'koishi';
 import { MessageService } from './message/message.service';
-
-declare module 'koishi' {
-  interface EventMap {
-    dispatch: (session: Session) => void;
-  }
-}
-
-const originalDispatch = Adapter.prototype.dispatch;
-Adapter.prototype.dispatch = function (this: Adapter, session: Session) {
-  if (!this.ctx.app.isActive) return;
-  originalDispatch.call(this, session);
-  this.ctx.emit(session, 'dispatch', session);
-};
+import { ReverseWsService } from './reverse-ws/reverse-ws.service';
 
 @Module({
   imports: [
@@ -33,6 +20,12 @@ Adapter.prototype.dispatch = function (this: Adapter, session: Session) {
       useWs: true,
     }),
   ],
-  providers: [BotLoaderService, RouteService, OnebotGateway, MessageService],
+  providers: [
+    BotLoaderService,
+    RouteService,
+    OnebotGateway,
+    MessageService,
+    ReverseWsService,
+  ],
 })
 export class AppModule {}

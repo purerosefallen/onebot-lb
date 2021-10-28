@@ -3,4 +3,8 @@ bots:
     endpoint: 'ws://localhost:6700'
     selfId: '1111111111'
     token: 'token'
-routes: []
+routes:
+  - name: default
+    botId: '3221204940'
+    token: 'oONw7YpqUdYuc'
+    balancePolicy: hash

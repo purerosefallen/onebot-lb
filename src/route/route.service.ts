@@ -29,10 +29,6 @@ export class RouteService
     return this.routes.get(name);
   }
 
-  getRoutesFromBot(botId: string) {
-    return Array.from(this.routes.values()).filter((r) => r.botId === botId);
-  }
-
   onApplicationBootstrap() {
     for (const route of this.routes.values()) {
       route.ctx.on('dispatch', (session) => this.onOnebotEvent(session, route));

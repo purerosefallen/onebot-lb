@@ -16,7 +16,7 @@ export class MessageService extends ConsoleLogger {
   registerWsEvent(client: WebSocket, route: Route) {
     client.on('message', async (data) => {
       if (typeof data !== 'string') {
-        this.warn(`Got non-string.`);
+        this.warn(`Got non-string from ${route.name}.`);
         client.send(
           JSON.stringify({
             retcode: 1400,
@@ -24,7 +24,7 @@ export class MessageService extends ConsoleLogger {
             data: null,
             error: {
               code: 1404,
-              message: `Got non-string`,
+              message: `Got non-string from ${route.name}.`,
             },
           }),
         );
@@ -35,7 +35,7 @@ export class MessageService extends ConsoleLogger {
         const message = JSON.stringify(await this.onWsEvent(route, parsedData));
         client.send(message);
       } catch (e) {
-        this.warn(`Got bad JSON ${data}`);
+        this.warn(`Got bad JSON ${data} from ${route.name}.`);
         client.send(
           JSON.stringify({
             retcode: 1400,
@@ -43,7 +43,7 @@ export class MessageService extends ConsoleLogger {
             data: null,
             error: {
               code: 1404,
-              message: `Got bad JSON.`,
+              message: `Got bad JSON from ${route.name}.`,
             },
           }),
         );
@@ -58,33 +58,34 @@ export class MessageService extends ConsoleLogger {
       (b) => b.selfId === route.botId && b.platform === 'onebot',
     ) as OneBotBot;
     if (!bot) {
-      this.error(`Bot ${route.botId} not found`);
+      this.error(`Bot ${route.botId} from ${route.name} not found.`);
       return {
         retcode: 1404,
         status: 'failed',
         data: null,
         error: {
           code: 1404,
-          message: `Bot ${route.botId} not found.`,
+          message: `Bot ${route.botId} from ${route.name} not found.`,
         },
         echo: data?.echo,
       };
     }
     try {
       const result = await bot.internal._request(data.action, data.params);
+      // console.log(result);
       return {
         ...result,
         echo: data?.echo,
       };
     } catch (e) {
-      this.error(`Bot ${route.botId} timed out.`);
+      this.error(`Bot ${route.botId} from ${route.name} timed out.`);
       return {
         retcode: 1404,
         status: 'failed',
         data: null,
         error: {
           code: 1404,
-          message: `Bot ${route.botId} timed out.`,
+          message: `Bot ${route.botId} from ${route.name} timed out.`,
         },
         echo: data?.echo,
       };

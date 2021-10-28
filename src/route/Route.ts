@@ -5,29 +5,37 @@ import { Random, remove } from 'koishi';
 import { createHash } from 'crypto';
 import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
 
-export type HashPolicy = 'broadcast' | 'random' | 'round-robin' | 'hash';
+export type BalancePolicy = 'broadcast' | 'random' | 'round-robin' | 'hash';
+
+export interface ReverseWsConfig {
+  url: string;
+  token?: string;
+  reconnectInterval?: number;
+}
 
 export interface RouteConfig {
   name: string;
   botId: string;
   token?: string;
   select?: Selection;
-  hashPolicy?: HashPolicy;
+  balancePolicy?: BalancePolicy;
   heartbeat?: number;
+  reverseWs?: ReverseWsConfig[];
 }
 export class Route implements RouteConfig {
-  connections: WebSocket[] = [];
+  private connections: WebSocket[] = [];
   private roundCount = 0;
   ctx: Context;
   name: string;
   botId: string;
   token?: string;
   select?: Selection;
-  hashPolicy?: HashPolicy;
+  balancePolicy?: BalancePolicy;
   heartbeat?: number;
   constructor(routeConfig: RouteConfig, ctx: Context) {
     Object.assign(this, routeConfig);
-    this.hashPolicy ||= 'hash';
+    this.balancePolicy ||= 'hash';
+    this.botId = this.botId.toString();
     this.ctx = this.getFilteredContext(ctx);
     if (this.heartbeat) {
       setInterval(() => {
@@ -41,23 +49,47 @@ export class Route implements RouteConfig {
       }, this.heartbeat);
     }
   }
-  send(data: any, sess: Session) {
+  send(data: any, sess: Session, allConns = this.connections) {
     const message = JSON.stringify(data);
-    for (const conn of this.getRelatedConnections(sess)) {
-      conn.send(message, (err) => {});
+    const conns = this.getRelatedConnections(sess, allConns);
+    for (const conn of conns) {
+      conn.send(message, (err) => {
+        if (err) {
+          this.ctx
+            .logger(`route-${this.name}`)
+            .error(`Failed to send data: ${err.message}`);
+          if (allConns.length > 1 && conns.length === 1) {
+            this.ctx
+              .logger(`route-${this.name}`)
+              .warn(`Retrying another connection.`);
+            this.send(
+              data,
+              sess,
+              allConns.filter((c) => c !== conn),
+            );
+          }
+        }
+      });
     }
   }
   broadcast(data: any) {
     const message = JSON.stringify(data);
     for (const conn of this.connections) {
-      conn.send(message, (err) => {});
+      conn.send(message, (err) => {
+        if (err) {
+          this.ctx
+            .logger(`route-${this.name}`)
+            .error(`Failed to broadcast data: ${err.message}`);
+        }
+      });
     }
   }
   getFilteredContext(ctx: Context) {
+    const idCtx = ctx.self(this.botId);
     if (!this.select) {
-      return ctx;
+      return idCtx;
     }
-    return ctx.select(this.select);
+    return idCtx.select(this.select);
   }
   private getSequenceFromSession(sess: Session) {
     const hash = createHash('md5');
@@ -68,23 +100,29 @@ export class Route implements RouteConfig {
     }
     return parseInt(hash.digest('hex'), 16) % 4294967295;
   }
-  getRelatedConnections(sess: Session): WebSocket[] {
-    switch (this.hashPolicy) {
-      case 'broadcast':
-        return this.connections;
-      case 'round-robin':
-        const index = this.roundCount++ % this.connections.length;
-        return [this.connections[index]];
-      case 'random':
-        return [Random.pick(this.connections)];
-      case 'hash':
-        return [
-          this.connections[
-            this.getSequenceFromSession(sess) % this.connections.length
-          ],
-        ];
+  getRelatedConnections(
+    sess: Session,
+    allConns = this.connections,
+  ): WebSocket[] {
+    if (allConns.length <= 1) {
+      return allConns;
     }
-    return [];
+    switch (this.balancePolicy) {
+      case 'broadcast':
+        return allConns;
+      case 'round-robin':
+        const index = this.roundCount++ % allConns.length;
+        return [allConns[index]];
+      case 'random':
+        return [Random.pick(allConns)];
+      case 'hash':
+        return [allConns[this.getSequenceFromSession(sess) % allConns.length]];
+      default:
+        this.ctx
+          .logger(`route-${this.name}`)
+          .error(`Unknown policy ${this.balancePolicy}`);
+        return [];
+    }
   }
   addConnection(conn: WebSocket) {
     this.connections.push(conn);

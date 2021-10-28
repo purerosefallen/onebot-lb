@@ -56,8 +56,9 @@ export class OnebotGateway
       ip: (request.socket.address() as AddressInfo).address,
     };
     this.clientRouteMap.set(client, clientInfo);
+    route.addConnection(client);
     this.messageService.registerWsEvent(client, route);
-    this.warn(
+    this.log(
       `Client ${clientInfo.ip} of route ${clientInfo.routeName} connected.`,
     );
   }
