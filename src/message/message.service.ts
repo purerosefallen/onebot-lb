@@ -6,10 +6,14 @@ import { Route } from '../route/Route';
 import { genMetaEvent } from '../utility/oicq';
 import { OnebotProtocol } from '../utility/onebot-protocol';
 import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
+import { WaitBotService } from '../wait-bot/wait-bot.service';
 
 @Injectable()
 export class MessageService extends ConsoleLogger {
-  constructor(@InjectContext() private ctx: Context) {
+  constructor(
+    @InjectContext() private ctx: Context,
+    private waitBot: WaitBotService,
+  ) {
     super('message');
   }
 
@@ -49,27 +53,28 @@ export class MessageService extends ConsoleLogger {
         );
       }
     });
-    client.send(JSON.stringify(genMetaEvent(route.botId, 'connect')));
-    client.send(JSON.stringify(genMetaEvent(route.botId, 'enable')));
+    client.send(JSON.stringify(genMetaEvent(route.selfId, 'connect')));
+    client.send(JSON.stringify(genMetaEvent(route.selfId, 'enable')));
   }
 
   private async onWsEvent(route: Route, data: OnebotProtocol) {
     const bot = this.ctx.bots.find(
-      (b) => b.selfId === route.botId && b.platform === 'onebot',
+      (b) => b.selfId === route.selfId && b.platform === 'onebot',
     ) as OneBotBot;
     if (!bot) {
-      this.error(`Bot ${route.botId} from ${route.name} not found.`);
+      this.error(`Bot ${route.selfId} from ${route.name} not found.`);
       return {
         retcode: 1404,
         status: 'failed',
         data: null,
         error: {
           code: 1404,
-          message: `Bot ${route.botId} from ${route.name} not found.`,
+          message: `Bot ${route.selfId} from ${route.name} not found.`,
         },
         echo: data?.echo,
       };
     }
+    await this.waitBot.waitForBotOnline(bot);
     try {
       const result = await bot.internal._request(data.action, data.params);
       // console.log(result);
@@ -78,14 +83,16 @@ export class MessageService extends ConsoleLogger {
         echo: data?.echo,
       };
     } catch (e) {
-      this.error(`Bot ${route.botId} from ${route.name} timed out.`);
+      this.error(
+        `Bot ${route.selfId} from ${route.name} errored: ${e.toString()}`,
+      );
       return {
         retcode: 1404,
         status: 'failed',
         data: null,
         error: {
           code: 1404,
-          message: `Bot ${route.botId} from ${route.name} timed out.`,
+          message: `Bot ${route.selfId} from ${route.name} errored.`,
         },
         echo: data?.echo,
       };

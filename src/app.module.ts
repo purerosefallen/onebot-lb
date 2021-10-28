@@ -7,6 +7,7 @@ import { RouteService } from './route/route.service';
 import { OnebotGateway } from './onebot.gateway';
 import { MessageService } from './message/message.service';
 import { ReverseWsService } from './reverse-ws/reverse-ws.service';
+import { WaitBotService } from './wait-bot/wait-bot.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ReverseWsService } from './reverse-ws/reverse-ws.service';
     OnebotGateway,
     MessageService,
     ReverseWsService,
+    WaitBotService,
   ],
 })
 export class AppModule {}

@@ -1,10 +1,20 @@
-bots:
-  - protocol: 'ws'
-    endpoint: 'ws://localhost:6700'
-    selfId: '1111111111'
-    token: 'token'
-routes:
-  - name: default
-    botId: '3221204940'
-    token: 'oONw7YpqUdYuc'
+onebot: # 配置模式请参照 [Koishi 文档](https://koishi.js.org/v4/plugins/adapter/onebot.html#%E6%9C%BA%E5%99%A8%E4%BA%BA%E9%80%89%E9%A1%B9)
+  bots:
+    - protocol: 'ws'
+      endpoint: 'ws://localhost:6700'
+      selfId: '1111111111'
+      token: 'token'
+routes: # 路由配置。对于每个消息或事件，负载均衡器会发给所有路由的依照策略的某一个连接。
+  - name: default # 必填。路由名称。机器人连接的 ws 路径为 ws://<地址>/routes/<name>
+    selfId: '3221204940' # 必填。机器人 ID，和 OneBot 配置的 selfId 一致
+    token: 'token' # 连接 token
+    # 分流策略，有 'broadcast' | 'random' | 'round-robin' | 'hash' 四种。
+    ## 分别为『广播给所有连接』『随机连接』『轮询』『按会话 hash』
+    ## 默认为 hash。在有机器人交互的应用中建议使用 hash
     balancePolicy: hash
+    select: false # 作用域，详见 [Koishi 文档](https://koishi.js.org/v4/guide/plugin/context.html#%E5%9C%A8%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E6%8B%A9%E5%99%A8)
+    heartbeat: 3000 # 心跳包的间隔。0 或不填为禁用心跳包。
+    wsReverse: # 该路由的反向 WebSocket 配置
+      - url: 'ws://localhost:8080'
+        token: 'token';
+        reconnectInterval: 60000 # 重连间隔

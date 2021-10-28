@@ -18,6 +18,7 @@ import * as PluginOnebot from '@koishijs/plugin-adapter-onebot';
 import { ConfigService } from '@nestjs/config';
 import { InjectContext, PluginDef, UsePlugin } from 'koishi-nestjs';
 import { BotConfig } from '@koishijs/plugin-adapter-onebot/lib/bot';
+import { AdapterConfig } from '@koishijs/plugin-adapter-onebot/lib/utils';
 
 @Injectable()
 export class BotLoaderService implements OnModuleInit {
@@ -28,11 +29,18 @@ export class BotLoaderService implements OnModuleInit {
 
   @UsePlugin()
   loadBots() {
-    const bots = this.config.get<BotConfig[]>('bots');
-    for (const bot of bots) {
-      bot.selfId = bot.selfId.toString();
+    const onebotConfig = this.config.get<
+      Adapter.PluginConfig<AdapterConfig, BotConfig>
+    >('onebot');
+    if (onebotConfig.selfId) {
+      onebotConfig.selfId = onebotConfig.selfId.toString();
     }
-    return PluginDef(PluginOnebot, { bots });
+    if (onebotConfig.bots) {
+      for (const bot of onebotConfig.bots) {
+        bot.selfId = bot.selfId.toString();
+      }
+    }
+    return PluginDef(PluginOnebot, onebotConfig);
   }
 
   onModuleInit() {

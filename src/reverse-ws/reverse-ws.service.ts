@@ -11,7 +11,7 @@ export class ReverseWsService extends ConsoleLogger {
   }
   initializeReverseWs(route: Route, revConfig: ReverseWsConfig) {
     const headers: OutgoingHttpHeaders = {
-      'X-Self-ID': route.botId,
+      'X-Self-ID': route.selfId,
       'X-Client-Role': 'Universal',
       'User-Agent': 'OneBot',
     };
@@ -19,10 +19,17 @@ export class ReverseWsService extends ConsoleLogger {
       headers['Authorization'] = `Bearer ${revConfig.token}`;
     }
     const ws = new WebSocket(revConfig.url, { headers });
-    ws.on('error', (err) =>
-      this.warn(`Socket from ${route.name} error: ${err.toString()}`),
-    );
+    const interval = revConfig.reconnectInterval || 5000;
+    let initialized = false;
+    ws.on('error', (err) => {
+      this.warn(`Socket from ${route.name} error: ${err.toString()}`);
+      if (!initialized) {
+        this.warn(`Will retry after ${interval} ms.`);
+        setTimeout(() => this.initializeReverseWs(route, revConfig), interval);
+      }
+    });
     ws.on('open', () => {
+      initialized = true;
       this.log(`Route ${route.name} connected to ${revConfig.url}.`);
       route.addConnection(ws);
       this.meesageService.registerWsEvent(ws, route);
@@ -30,7 +37,7 @@ export class ReverseWsService extends ConsoleLogger {
     ws.on('close', (code, msg) => {
       route.removeConnection(ws);
       const interval = revConfig.reconnectInterval || 5000;
-      this.log(
+      this.warn(
         `Route ${route.name} disconnected from ${revConfig.url}: ${code}: ${msg}. Will retry after ${interval} ms.`,
       );
       setTimeout(() => this.initializeReverseWs(route, revConfig), interval);

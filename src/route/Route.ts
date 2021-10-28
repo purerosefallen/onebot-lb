@@ -3,7 +3,6 @@ import type WebSocket from 'ws';
 import { Context, Session } from 'koishi';
 import { Random, remove } from 'koishi';
 import { createHash } from 'crypto';
-import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
 
 export type BalancePolicy = 'broadcast' | 'random' | 'round-robin' | 'hash';
 
@@ -15,7 +14,7 @@ export interface ReverseWsConfig {
 
 export interface RouteConfig {
   name: string;
-  botId: string;
+  selfId: string;
   token?: string;
   select?: Selection;
   balancePolicy?: BalancePolicy;
@@ -27,20 +26,22 @@ export class Route implements RouteConfig {
   private roundCount = 0;
   ctx: Context;
   name: string;
-  botId: string;
+  selfId: string;
   token?: string;
   select?: Selection;
   balancePolicy?: BalancePolicy;
   heartbeat?: number;
+  reverseWs?: ReverseWsConfig[];
+  preMessages: { data: any; session: Session }[] = [];
   constructor(routeConfig: RouteConfig, ctx: Context) {
     Object.assign(this, routeConfig);
     this.balancePolicy ||= 'hash';
-    this.botId = this.botId.toString();
+    this.selfId = this.selfId.toString();
     this.ctx = this.getFilteredContext(ctx);
     if (this.heartbeat) {
       setInterval(() => {
         this.broadcast({
-          self_id: this.botId,
+          self_id: this.selfId,
           time: Math.floor(Date.now() / 1000),
           post_type: 'meta_event',
           meta_event_type: 'heartbeat',
@@ -49,9 +50,13 @@ export class Route implements RouteConfig {
       }, this.heartbeat);
     }
   }
-  send(data: any, sess: Session, allConns = this.connections) {
+  send(data: any, session: Session, allConns = this.connections) {
+    if (!allConns.length) {
+      this.preMessages.push({ data, session });
+      return;
+    }
     const message = JSON.stringify(data);
-    const conns = this.getRelatedConnections(sess, allConns);
+    const conns = this.getRelatedConnections(session, allConns);
     for (const conn of conns) {
       conn.send(message, (err) => {
         if (err) {
@@ -64,7 +69,7 @@ export class Route implements RouteConfig {
               .warn(`Retrying another connection.`);
             this.send(
               data,
-              sess,
+              session,
               allConns.filter((c) => c !== conn),
             );
           }
@@ -85,7 +90,7 @@ export class Route implements RouteConfig {
     }
   }
   getFilteredContext(ctx: Context) {
-    const idCtx = ctx.self(this.botId);
+    const idCtx = ctx.self(this.selfId);
     if (!this.select) {
       return idCtx;
     }
@@ -126,7 +131,11 @@ export class Route implements RouteConfig {
   }
   addConnection(conn: WebSocket) {
     this.connections.push(conn);
-    return conn;
+    const preMessages = this.preMessages;
+    this.preMessages = [];
+    for (const message of preMessages) {
+      this.send(message.data, message.session);
+    }
   }
   removeConnection(conn: WebSocket) {
     remove(this.connections, conn);
