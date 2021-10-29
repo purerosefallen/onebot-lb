@@ -10,7 +10,6 @@ import {
 } from '../utility/onebot-protocol';
 import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
 import { WaitBotService } from '../wait-bot/wait-bot.service';
-import { Interval } from '@nestjs/schedule';
 
 export interface SendTask {
   bot: OneBotBot;
