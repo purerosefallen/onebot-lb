@@ -115,15 +115,15 @@ export class MessageService extends ConsoleLogger {
       };
     }
     // eslint-disable-next-line prefer-const
-    let { action, params, echo } = data;
+    let { action } = data;
     const isAsync = action.endsWith('_async');
     if (isAsync) action = action.replace('_async', '');
     const isQueue = action.endsWith('_rate_limited');
     if (isQueue) action = action.replace('_rate_limited', '');
-    const task: SendTask = { bot, route, data: { action, params, echo } };
+    const task: SendTask = { bot, route, data: { ...data, action } };
     if (route.readonly && !action.startsWith('get_')) {
       if (isAsync || isQueue) {
-        return OnebotAsyncResponseWithEcho(echo);
+        return OnebotAsyncResponseWithEcho(data.echo);
       }
       return {
         retcode: 0,
@@ -136,11 +136,11 @@ export class MessageService extends ConsoleLogger {
     }
     if (isQueue) {
       route.addSendTask(task);
-      return OnebotAsyncResponseWithEcho(echo);
+      return OnebotAsyncResponseWithEcho(data.echo);
     }
     const prom = this.sendToBot(task);
     if (isAsync) {
-      return OnebotAsyncResponseWithEcho(echo);
+      return OnebotAsyncResponseWithEcho(data.echo);
     }
     return prom;
   }
