@@ -18,19 +18,17 @@ export class ReverseWsService extends ConsoleLogger {
     if (revConfig.token) {
       headers['Authorization'] = `Bearer ${revConfig.token}`;
     }
-    const ws = new WebSocket(revConfig.url, { headers });
-    const interval = revConfig.reconnectInterval || 5000;
-    let initialized = false;
+    const ws = new WebSocket(revConfig.endpoint, { headers });
     ws.on('error', (err) => {
-      this.warn(`Socket from ${route.name} error: ${err.toString()}`);
-      if (!initialized) {
-        this.warn(`Will retry after ${interval} ms.`);
-        setTimeout(() => this.initializeReverseWs(route, revConfig), interval);
-      }
+      this.warn(
+        `Socket ${revConfig.endpoint} from ${
+          route.name
+        } error: ${err.toString()}`,
+      );
     });
     ws.on('open', () => {
-      initialized = true;
-      this.log(`Route ${route.name} connected to ${revConfig.url}.`);
+      //initialized = true;
+      this.log(`Route ${route.name} connected to ${revConfig.endpoint}.`);
       route.addConnection(ws);
       this.meesageService.registerWsEvent(ws, route);
     });
@@ -38,7 +36,7 @@ export class ReverseWsService extends ConsoleLogger {
       route.removeConnection(ws);
       const interval = revConfig.reconnectInterval || 5000;
       this.warn(
-        `Route ${route.name} disconnected from ${revConfig.url}: ${code}: ${msg}. Will retry after ${interval} ms.`,
+        `Socket ${revConfig.endpoint} from ${route.name} disconnected: ${code}: ${msg}. Will retry after ${interval} ms.`,
       );
       setTimeout(() => this.initializeReverseWs(route, revConfig), interval);
     });

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { KoishiWsAdapter } from 'koishi-nestjs';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,7 +21,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, documentConfig);
   SwaggerModule.setup('docs', app, document);
   */
-
-  await app.listen(3000);
+  const config = app.get(ConfigService);
+  await app.listen(
+    config.get<number>('port') || 3000,
+    config.get<string>('host') || '::',
+  );
 }
 bootstrap();

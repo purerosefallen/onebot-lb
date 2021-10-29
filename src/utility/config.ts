@@ -6,6 +6,8 @@ import { AdapterConfig } from '@koishijs/plugin-adapter-onebot/lib/utils';
 import { BotConfig } from '@koishijs/plugin-adapter-onebot/lib/bot';
 
 export interface LbConfig {
+  host: string;
+  port: number;
   onebot: Adapter.PluginConfig<AdapterConfig, BotConfig>;
   routes: RouteConfig[];
 }

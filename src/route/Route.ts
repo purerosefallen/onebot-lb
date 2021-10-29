@@ -7,7 +7,7 @@ import { createHash } from 'crypto';
 export type BalancePolicy = 'broadcast' | 'random' | 'round-robin' | 'hash';
 
 export interface ReverseWsConfig {
-  url: string;
+  endpoint: string;
   token?: string;
   reconnectInterval?: number;
 }

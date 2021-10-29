@@ -11,3 +11,11 @@
 ## Docker
 
 Docker 容器镜像位于 `git-registry.mycard.moe/3rdeye/onebot-lb`。使用时把 `config.yaml` 挂载到 `/usr/src/app/config.yaml` 即可。
+
+## 运行
+
+### http 路径
+
+* `/onebot` OneBot 后端 (http 或反向 WebSocket) 连接的路径。
+
+* `/route/<app name>` app 后端连接的路径。
