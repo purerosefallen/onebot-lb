@@ -3,6 +3,7 @@ import type WebSocket from 'ws';
 import { Context, Session } from 'koishi';
 import { Random, remove } from 'koishi';
 import { createHash } from 'crypto';
+import { SendTask } from '../message/message.service';
 
 export type BalancePolicy = 'broadcast' | 'random' | 'round-robin' | 'hash';
 
@@ -19,11 +20,14 @@ export interface RouteConfig {
   select?: Selection;
   balancePolicy?: BalancePolicy;
   heartbeat?: number;
+  readonly?: boolean;
+  rateLimitInterval?: number;
   reverseWs?: ReverseWsConfig[];
 }
 export class Route implements RouteConfig {
   private connections: WebSocket[] = [];
   private roundCount = 0;
+  private sendQueue: SendTask[] = [];
   ctx: Context;
   name: string;
   selfId: string;
@@ -32,10 +36,13 @@ export class Route implements RouteConfig {
   balancePolicy?: BalancePolicy;
   heartbeat?: number;
   reverseWs?: ReverseWsConfig[];
+  readonly?: boolean;
+  rateLimitInterval: number;
   preMessages: { data: any; session: Session }[] = [];
   constructor(routeConfig: RouteConfig, ctx: Context) {
     Object.assign(this, routeConfig);
     this.balancePolicy ||= 'hash';
+    this.rateLimitInterval ||= 500;
     this.selfId = this.selfId.toString();
     this.ctx = this.getFilteredContext(ctx);
     if (this.heartbeat) {
@@ -96,11 +103,22 @@ export class Route implements RouteConfig {
     }
     return idCtx.select(this.select);
   }
+  static sessionKeys: (keyof Session)[] = [
+    'selfId',
+    'guildId',
+    'userId',
+    'channelId',
+    'operatorId',
+    'type',
+    'subtype',
+    'subsubtype',
+  ];
   private getSequenceFromSession(sess: Session) {
     const hash = createHash('md5');
-    for (const key of ['selfId', 'guildId', 'userId', 'channelId']) {
-      if (sess[key]) {
-        hash.update(sess[key]);
+    for (const key of Route.sessionKeys) {
+      const value = sess[key] as string;
+      if (value) {
+        hash.update(value);
       }
     }
     return parseInt(hash.digest('hex'), 16) % 4294967295;
@@ -139,5 +157,14 @@ export class Route implements RouteConfig {
   }
   removeConnection(conn: WebSocket) {
     remove(this.connections, conn);
+  }
+  addSendTask(task: SendTask) {
+    this.sendQueue.push(task);
+  }
+  fetchSendTask() {
+    if (!this.sendQueue.length) {
+      return;
+    }
+    return this.sendQueue.shift();
   }
 }

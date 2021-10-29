@@ -8,6 +8,7 @@ import { Route, RouteConfig } from './Route';
 import { InjectContextPlatform } from 'koishi-nestjs';
 import { Context, Session } from 'koishi';
 import { ReverseWsService } from '../reverse-ws/reverse-ws.service';
+import { MessageService } from '../message/message.service';
 
 @Injectable()
 export class RouteService
@@ -18,6 +19,7 @@ export class RouteService
     config: ConfigService,
     @InjectContextPlatform('onebot') private ctx: Context,
     private reverseWsService: ReverseWsService,
+    private messageService: MessageService,
   ) {
     super('route');
     const routeConfs = config.get<RouteConfig[]>('routes');
@@ -31,6 +33,10 @@ export class RouteService
     return this.routes.get(name);
   }
 
+  getAllRoutes() {
+    return Array.from(this.routes.values());
+  }
+
   onApplicationBootstrap() {
     for (const route of this.routes.values()) {
       route.ctx.on('dispatch', (session) => this.onOnebotEvent(session, route));
@@ -39,6 +45,7 @@ export class RouteService
           this.reverseWsService.initializeReverseWs(route, revConfig);
         }
       }
+      this.messageService.registerRouteTaskInterval(route);
     }
   }
 

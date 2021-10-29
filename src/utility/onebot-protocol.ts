@@ -4,17 +4,17 @@ export interface OnebotProtocol {
   echo?: any;
 }
 
-export const OnebotWsResponse = {
+export const OnebotAsyncResponse = {
   retcode: 1,
   status: 'async',
   data: null,
   error: null,
 };
-export const OnebotWsResponseString = JSON.stringify(OnebotWsResponse);
+export const OnebotAsyncResponseString = JSON.stringify(OnebotAsyncResponse);
 
-export function OnebotWsResponseWithEcho(echo: any) {
+export function OnebotAsyncResponseWithEcho(echo: any) {
   return {
-    ...OnebotWsResponse,
+    ...OnebotAsyncResponse,
     echo,
   };
 }
