@@ -58,7 +58,7 @@ Docker 容器镜像位于 `git-registry.mycard.moe/3rdeye/onebot-lb`。使用时
 
 ### 分流策略
 
-`onebot-lb` 支持4种负载均衡分流策略，在 `routes` 进的 `balancePolicy` 进行设定该路由的分流策略。
+`onebot-lb` 支持4种负载均衡分流策略，在 `routes` 的 `balancePolicy` 进行设定该路由的分流策略。
 
 #### broadcast
 
