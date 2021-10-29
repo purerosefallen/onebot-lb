@@ -1,8 +1,10 @@
 # onebot-lb
 
-[OneBot](https://onebot.dev/) 负载均衡器。
+[OneBot](https://onebot.dev/) 负载均衡器。`onebot-lb` 对每个路由连接1个 Bot 后端，接收来自多个 app 后端的连接，并对来自 Bot 的信息或事件负载均衡，转发 app 后端要发送给 Bot 的消息。
 
-目前支持 OneBot v11 的双向 WebSockets 作为应用后端，以及全部连接方式作为 Bot 后端。
+`onebot-lb` 为高可用以及规模化的 OneBot 应用打造。
+
+`onebot-lb` 目前支持 OneBot v11 的双向 WebSockets 作为应用后端，以及全部连接方式作为 Bot 后端。
 
 ## 配置
 
@@ -75,3 +77,7 @@ Docker 容器镜像位于 `git-registry.mycard.moe/3rdeye/onebot-lb`。使用时
 该模式下，消息和事件会依照消息类型，机器人 ID，用户 ID 以及群号等信息进行 hash，并确定发送的目标 app 后端连接。
 
 该模式是默认分流策略，推荐在有机器人交互的环境下使用。
+
+## LICENSE
+
+MIT
