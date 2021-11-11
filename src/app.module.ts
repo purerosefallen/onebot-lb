@@ -8,6 +8,8 @@ import { OnebotGateway } from './onebot.gateway';
 import { MessageService } from './message/message.service';
 import { ReverseWsService } from './reverse-ws/reverse-ws.service';
 import { WaitBotService } from './wait-bot/wait-bot.service';
+import { HealthService } from './health/health.service';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { WaitBotService } from './wait-bot/wait-bot.service';
     MessageService,
     ReverseWsService,
     WaitBotService,
+    HealthService,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

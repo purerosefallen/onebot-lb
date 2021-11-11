@@ -16,6 +16,7 @@ async function bootstrap() {
     .setTitle('onebot-lb')
     .setDescription('OneBot 负载均衡器')
     .setVersion('1.1')
+    .addTag('health', '状态检查')
     .build();
 
   const document = SwaggerModule.createDocument(app, documentConfig);

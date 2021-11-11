@@ -4,6 +4,7 @@ import { Context, Session } from 'koishi';
 import { Random, remove } from 'koishi';
 import { createHash } from 'crypto';
 import { SendTask } from '../message/message.service';
+import { HealthInfoDto } from '../dto/HealthInfo.dto';
 
 export type BalancePolicy = 'broadcast' | 'random' | 'round-robin' | 'hash';
 
@@ -56,6 +57,12 @@ export class Route implements RouteConfig {
         });
       }, this.heartbeat);
     }
+  }
+  isHealthy() {
+    return this.connections.length > 0;
+  }
+  getHealthyInfo() {
+    return new HealthInfoDto(this.name, this.isHealthy());
   }
   send(data: any, session: Session, allConns = this.connections) {
     if (!allConns.length) {

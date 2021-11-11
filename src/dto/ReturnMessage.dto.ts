@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HttpException } from '@nestjs/common';
+import { HealthInfoDto } from './HealthInfo.dto';
 
 export interface BlankReturnMessage {
   statusCode: number;
@@ -38,4 +39,14 @@ export class ReturnMessageDto<T>
     super(statusCode, message);
     this.data = data;
   }
+}
+
+export class HealthyReturnMessageDto extends BlankReturnMessageDto {
+  @ApiProperty({ description: '健康状态', type: HealthInfoDto })
+  data: HealthInfoDto;
+}
+
+export class HealthyArrayReturnMessageDto extends BlankReturnMessageDto {
+  @ApiProperty({ description: '健康状态', type: [HealthInfoDto] })
+  data: HealthInfoDto[];
 }

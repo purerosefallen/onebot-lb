@@ -78,6 +78,10 @@ Docker 容器镜像位于 `git-registry.mycard.moe/3rdeye/onebot-lb`。使用时
 
 该模式是默认分流策略，推荐在有机器人交互的环境下使用。
 
+### HTTP API
+
+详见本项目的 Swagger API ，在 `/docs` 路径下。
+
 ## LICENSE
 
 MIT
