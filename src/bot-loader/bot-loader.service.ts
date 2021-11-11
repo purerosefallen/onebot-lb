@@ -14,7 +14,7 @@ Adapter.prototype.dispatch = function (this: Adapter, session: Session) {
   this.ctx.emit(session, 'dispatch', session);
 };
 
-import * as PluginOnebot from '@koishijs/plugin-adapter-onebot';
+import PluginOnebot from '@koishijs/plugin-adapter-onebot';
 import { ConfigService } from '@nestjs/config';
 import { InjectContext, PluginDef, UsePlugin } from 'koishi-nestjs';
 import { BotConfig } from '@koishijs/plugin-adapter-onebot/lib/bot';
