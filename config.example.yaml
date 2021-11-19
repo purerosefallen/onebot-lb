@@ -14,7 +14,7 @@ onebot:
 ## app 后端只支持正向和反向 WebSocket
 ## 对于每个消息或事件，负载均衡器会发给所有路由的依照策略的某一个连接。
 routes:
-  - name: default # 必填。路由名称。机器人连接的 ws 路径为 ws://<地址>/routes/<name>
+  - name: default # 必填。路由名称。机器人连接的 ws 路径为 ws://<地址>/route/<name>
     selfId: '3221204940' # 必填。机器人 ID，和 OneBot 配置的 selfId 一致
     token: 'token' # 连接 token
     # 分流策略，有 'broadcast' | 'random' | 'round-robin' | 'hash' 四种。
