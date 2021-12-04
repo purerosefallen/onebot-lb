@@ -21,7 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@koishijs/plugin-adapter-onebot": "^4.0.0-beta.0",
+    "@koishijs/plugin-adapter-onebot": "^4.0.0-beta.3",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.0.3",
     "@nestjs/core": "^8.0.0",
@@ -30,8 +30,8 @@
     "@nestjs/websockets": "^8.1.2",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
-    "koishi": "^4.0.0-beta.0",
-    "koishi-nestjs": "^2.0.0",
+    "koishi": "^4.0.0-beta.4",
+    "koishi-nestjs": "^2.2.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
