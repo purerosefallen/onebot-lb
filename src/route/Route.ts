@@ -24,6 +24,7 @@ export interface RouteConfig {
   readonly?: boolean;
   rateLimitInterval?: number;
   reverseWs?: ReverseWsConfig[];
+  bufferMessage?: boolean;
 }
 export class Route implements RouteConfig {
   private connections: WebSocket[] = [];
@@ -39,6 +40,7 @@ export class Route implements RouteConfig {
   reverseWs?: ReverseWsConfig[];
   readonly?: boolean;
   rateLimitInterval: number;
+  bufferMessage?: boolean;
   preMessages: { data: any; session: Session }[] = [];
   constructor(routeConfig: RouteConfig, ctx: Context) {
     Object.assign(this, routeConfig);
@@ -66,7 +68,9 @@ export class Route implements RouteConfig {
   }
   send(data: any, session: Session, allConns = this.connections) {
     if (!allConns.length) {
-      this.preMessages.push({ data, session });
+      if (this.bufferMessage) {
+        this.preMessages.push({ data, session });
+      }
       return;
     }
     const message = JSON.stringify(data);
@@ -156,6 +160,9 @@ export class Route implements RouteConfig {
   }
   addConnection(conn: WebSocket) {
     this.connections.push(conn);
+    if (!this.bufferMessage) {
+      return;
+    }
     const preMessages = this.preMessages;
     this.preMessages = [];
     for (const message of preMessages) {
