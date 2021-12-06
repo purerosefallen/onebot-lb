@@ -3,12 +3,13 @@ import { RouteService } from '../route/route.service';
 import { InjectContext } from 'koishi-nestjs';
 import { Context } from 'koishi';
 import { HealthInfoDto } from '../dto/HealthInfo.dto';
+import { BotRegistryService } from '../bot-registry/bot-registry.service';
 
 @Injectable()
 export class HealthService {
   constructor(
     private readonly routeService: RouteService,
-    @InjectContext() private readonly ctx: Context,
+    private readonly botRegistry: BotRegistryService,
   ) {}
 
   healthOfAllRoutes() {
@@ -20,13 +21,13 @@ export class HealthService {
   }
 
   healthOfAllBots() {
-    return this.ctx.bots.map(
-      (b) => new HealthInfoDto(b.selfId, b.status === 'online'),
-    );
+    return this.botRegistry
+      .getAllBots()
+      .map((b) => new HealthInfoDto(b.selfId, b.status === 'online'));
   }
 
   healthOfBot(selfId: string) {
-    const bot = this.ctx.bots.find((b) => b.selfId === selfId);
+    const bot = this.botRegistry.getBotWithId(selfId);
     if (!bot) {
       return;
     }

@@ -10,6 +10,7 @@ import {
 } from '../utility/onebot-protocol';
 import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
 import { WaitBotService } from '../wait-bot/wait-bot.service';
+import { BotRegistryService } from '../bot-registry/bot-registry.service';
 
 export interface SendTask {
   bot: OneBotBot;
@@ -20,8 +21,8 @@ export interface SendTask {
 @Injectable()
 export class MessageService extends ConsoleLogger {
   constructor(
-    @InjectContext() private ctx: Context,
-    private waitBot: WaitBotService,
+    private readonly botRegistry: BotRegistryService,
+    private readonly waitBot: WaitBotService,
   ) {
     super('message');
   }
@@ -66,8 +67,28 @@ export class MessageService extends ConsoleLogger {
     client.send(JSON.stringify(genMetaEvent(route.selfId, 'enable')));
   }
 
+  private isRouteBotHealthy(route: Route): boolean {
+    const bot = this.botRegistry.getBotWithId(route.selfId);
+    return bot && bot.status === 'online';
+  }
+
   private async sendToBot(task: SendTask) {
-    await this.waitBot.waitForBotOnline(task.bot);
+    if (!this.isRouteBotHealthy(task.route)) {
+      if (task.route.bufferBotMessage) {
+        await this.waitBot.waitForBotOnline(task.bot);
+      } else {
+        return {
+          retcode: 1404,
+          status: 'failed',
+          data: null,
+          error: {
+            code: 1404,
+            message: `Bot ${task.route.selfId} from ${task.route.name} not online.`,
+          },
+          echo: task.data?.echo,
+        };
+      }
+    }
     try {
       const result = await task.bot.internal._request(
         task.data.action,
@@ -98,9 +119,7 @@ export class MessageService extends ConsoleLogger {
   }
 
   private async onWsEvent(route: Route, data: OnebotProtocol) {
-    const bot = this.ctx.bots.find(
-      (b) => b.selfId === route.selfId && b.platform === 'onebot',
-    ) as OneBotBot;
+    const bot = this.botRegistry.getBotWithId(route.selfId);
     if (!bot) {
       this.error(`Bot ${route.selfId} from ${route.name} not found.`);
       return {
@@ -153,6 +172,10 @@ export class MessageService extends ConsoleLogger {
   }
 
   private async resolveSendTaskOfRoute(route: Route) {
+    const bot = this.botRegistry.getBotWithId(route.selfId);
+    if (!bot || bot.status !== 'online') {
+      return;
+    }
     const task = route.fetchSendTask();
     if (!task) {
       return;

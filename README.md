@@ -38,7 +38,8 @@ routes:
     heartbeat: 3000 # 心跳包的间隔。0 或不填为禁用心跳包。
     readonly: false # 该路由是否为只读。只读路由的连接无法对机器人进行写操作，只会得到模拟响应，但是可以进行 get 操作以及接收事件。
     rateLimitInterval: 500 # 限速调用间隔，默认 500ms。
-    bufferMessage: false # 是否在 app 断线期间缓存消息，并在 app 恢复连接时发送。
+    bufferAppMessage: false # 是否在 app 断线期间缓存消息，并在 app 恢复连接时发送。
+    bufferBotMessage: false # 是否在机器人断线期间缓存消息，并在机器人恢复连接时发送。
     wsReverse: # 该路由的反向 WebSocket 配置。可以配置多个。
       - endpoint: 'ws://localhost:8080'
         token: 'token'

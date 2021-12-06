@@ -10,6 +10,7 @@ import { ReverseWsService } from './reverse-ws/reverse-ws.service';
 import { WaitBotService } from './wait-bot/wait-bot.service';
 import { HealthService } from './health/health.service';
 import { HealthController } from './health/health.controller';
+import { BotRegistryService } from './bot-registry/bot-registry.service';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HealthController } from './health/health.controller';
     ReverseWsService,
     WaitBotService,
     HealthService,
+    BotRegistryService,
   ],
   controllers: [HealthController],
 })
