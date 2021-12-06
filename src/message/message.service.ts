@@ -165,6 +165,9 @@ export class MessageService extends ConsoleLogger {
   }
 
   registerRouteTaskInterval(route: Route) {
+    if (route.readonly) {
+      return;
+    }
     setInterval(
       () => this.resolveSendTaskOfRoute(route),
       route.rateLimitInterval,
