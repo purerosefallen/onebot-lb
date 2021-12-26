@@ -31,7 +31,7 @@
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "koishi": "^4.0.0-rc.0",
-    "koishi-nestjs": "^2.2.2",
+    "koishi-nestjs": "^3.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
