@@ -17,7 +17,7 @@ export class WaitBotService {
     });
   }
 
-  @UseEvent('bot-updated')
+  @UseEvent('bot-status-updated')
   onBotChanged(bot: Bot) {
     if (bot.status !== 'online') {
       return;
