@@ -1,6 +1,5 @@
-import { Selection } from 'koishi-nestjs';
 import type WebSocket from 'ws';
-import { Context, Session } from 'koishi';
+import { Context, Session, Selection } from 'koishi';
 import { Random, remove } from 'koishi';
 import { createHash } from 'crypto';
 import { SendTask } from '../message/message.service';
