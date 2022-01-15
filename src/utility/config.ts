@@ -2,8 +2,8 @@ import yaml from 'yaml';
 import * as fs from 'fs';
 import { RouteConfig } from '../route/Route';
 import { Adapter } from 'koishi';
-import { AdapterConfig } from '@koishijs/plugin-adapter-onebot/lib/utils';
-import { BotConfig } from '@koishijs/plugin-adapter-onebot/lib/bot';
+import { AdapterConfig } from '../adapter-onebot/utils';
+import { BotConfig } from '../adapter-onebot';
 
 export interface LbConfig {
   host: string;

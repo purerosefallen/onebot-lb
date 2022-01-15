@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { RouteService } from '../route/route.service';
-import { InjectContext } from 'koishi-nestjs';
-import { Context } from 'koishi';
 import { HealthInfoDto } from '../dto/HealthInfo.dto';
 import { BotRegistryService } from '../bot-registry/bot-registry.service';
 

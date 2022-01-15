@@ -1,5 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Adapter, Context, Session } from 'koishi';
+import PluginOnebot from '../adapter-onebot';
+import { ConfigService } from '@nestjs/config';
+import { InjectContext, PluginDef, UsePlugin } from 'koishi-nestjs';
+import { BotConfig } from '../adapter-onebot';
+import { AdapterConfig } from '../adapter-onebot/utils';
 
 declare module 'koishi' {
   interface EventMap {
@@ -14,24 +19,14 @@ Adapter.prototype.dispatch = function (this: Adapter, session: Session) {
   this.ctx.emit(session, 'dispatch', session);
 };
 
-import PluginOnebot from '@koishijs/plugin-adapter-onebot';
-import { ConfigService } from '@nestjs/config';
-import { InjectContext, PluginDef, UsePlugin } from 'koishi-nestjs';
-import { BotConfig } from '@koishijs/plugin-adapter-onebot/lib/bot';
-import { AdapterConfig } from '@koishijs/plugin-adapter-onebot/lib/utils';
-
 @Injectable()
-export class BotLoaderService implements OnModuleInit {
-  constructor(
-    private config: ConfigService,
-    @InjectContext() private ctx: Context,
-  ) {}
+export class BotLoaderService {
+  constructor(private config: ConfigService) {}
 
   @UsePlugin()
   loadBots() {
-    const onebotConfig = this.config.get<
-      Adapter.PluginConfig<AdapterConfig, BotConfig>
-    >('onebot');
+    const onebotConfig =
+      this.config.get<Adapter.PluginConfig<AdapterConfig, BotConfig>>('onebot');
     if (onebotConfig.selfId) {
       onebotConfig.selfId = onebotConfig.selfId.toString();
     }
@@ -41,14 +36,5 @@ export class BotLoaderService implements OnModuleInit {
       }
     }
     return PluginDef(PluginOnebot, onebotConfig);
-  }
-
-  onModuleInit() {
-    const helpCommand = this.ctx.command('help');
-    if (!helpCommand) {
-      return;
-    }
-    const helpCtx = helpCommand.context;
-    helpCommand.context = helpCtx.never();
   }
 }

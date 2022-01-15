@@ -20,6 +20,7 @@ import { BotRegistryService } from './bot-registry/bot-registry.service';
     }),
     KoishiModule.register({
       prefix: '__never_prefix',
+      help: false,
       minSimilarity: 1,
       useWs: true,
     }),

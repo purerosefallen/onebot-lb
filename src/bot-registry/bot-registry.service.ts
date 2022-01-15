@@ -1,25 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { WireContextService } from 'koishi-nestjs';
-import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
+import { OneBotBot } from '../adapter-onebot';
+import { Adapter } from 'koishi';
 
 @Injectable()
 export class BotRegistryService {
   @WireContextService('bots')
-  private bots: OneBotBot[];
+  private bots: Adapter.BotList;
 
-  private botMap = new Map<string, OneBotBot>();
-
-  getBotWithId(selfId: string) {
-    if (!this.botMap.has(selfId)) {
-      const bot = this.bots.find((bot) => bot.selfId === selfId);
-      if (bot) {
-        this.botMap.set(selfId, bot);
-      }
-    }
-    return this.botMap.get(selfId);
+  getBotWithId(selfId: string): OneBotBot {
+    return this.bots.get(`onebot:${selfId}`) as OneBotBot;
   }
 
-  getAllBots() {
-    return this.bots;
+  getAllBots(): OneBotBot[] {
+    return this.bots as unknown as OneBotBot[];
   }
 }

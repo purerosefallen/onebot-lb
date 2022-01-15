@@ -5,6 +5,7 @@ export class HealthInfoDto {
   name: string;
   @ApiProperty({ description: '是否健康' })
   healthy: boolean;
+
   constructor(name: string, healthy: boolean) {
     this.name = name;
     this.healthy = healthy;

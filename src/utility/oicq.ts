@@ -14,6 +14,7 @@ export const BOOLS = [
   'approve',
   'block',
 ];
+
 export function toBool(v: any) {
   if (v === '0' || v === 'false') v = false;
   return Boolean(v);

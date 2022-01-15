@@ -1,14 +1,12 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { InjectContext } from 'koishi-nestjs';
-import { Context } from 'koishi';
 import WebSocket from 'ws';
 import { Route } from '../route/Route';
 import { genMetaEvent } from '../utility/oicq';
 import {
-  OnebotProtocol,
   OnebotAsyncResponseWithEcho,
+  OnebotProtocol,
 } from '../utility/onebot-protocol';
-import { OneBotBot } from '@koishijs/plugin-adapter-onebot/lib/bot';
+import { OneBotBot } from '../adapter-onebot';
 import { WaitBotService } from '../wait-bot/wait-bot.service';
 import { BotRegistryService } from '../bot-registry/bot-registry.service';
 

@@ -2,7 +2,6 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketGateway,
-  WsException,
 } from '@nestjs/websockets';
 import { IncomingMessage } from 'http';
 import { RouteService } from './route/route.service';
@@ -21,15 +20,18 @@ interface ClientInfo {
 @WebSocketGateway({ path: '^/route/(.+?)/?$' })
 export class OnebotGateway
   extends ConsoleLogger
-  implements OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private routeService: RouteService,
     private messageService: MessageService,
   ) {
     super('ws');
   }
+
   private clientRouteMap = new Map<WebSocket, ClientInfo>();
   private matchingRegex = new RegExp('^/route/(.+?)/?$');
+
   handleConnection(client: WebSocket, request: IncomingMessage) {
     const baseUrl = 'ws://' + request.headers.host + '/';
     const url = new URL(request.url, baseUrl);
@@ -62,6 +64,7 @@ export class OnebotGateway
       `Client ${clientInfo.ip} of route ${clientInfo.routeName} connected.`,
     );
   }
+
   handleDisconnect(client: WebSocket) {
     const clientInfo = this.clientRouteMap.get(client);
     if (!clientInfo) {

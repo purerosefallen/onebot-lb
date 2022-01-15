@@ -13,8 +13,10 @@ import { MessageService } from '../message/message.service';
 @Injectable()
 export class RouteService
   extends ConsoleLogger
-  implements OnApplicationBootstrap {
+  implements OnApplicationBootstrap
+{
   private routes = new Map<string, Route>();
+
   constructor(
     config: ConfigService,
     @InjectContextPlatform('onebot') private ctx: Context,

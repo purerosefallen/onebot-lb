@@ -1,6 +1,5 @@
 import type WebSocket from 'ws';
-import { Context, Session, Selection } from 'koishi';
-import { Random, remove } from 'koishi';
+import { Context, Random, remove, Selection, Session } from 'koishi';
 import { createHash } from 'crypto';
 import { SendTask } from '../message/message.service';
 import { HealthInfoDto } from '../dto/HealthInfo.dto';
@@ -26,6 +25,7 @@ export interface RouteConfig {
   bufferAppMessage?: boolean;
   bufferBotMessage?: boolean;
 }
+
 export class Route implements RouteConfig {
   private connections: WebSocket[] = [];
   private roundCount = 0;
@@ -43,6 +43,7 @@ export class Route implements RouteConfig {
   bufferAppMessage?: boolean;
   bufferBotMessage?: boolean;
   preMessages: { data: any; session: Session }[] = [];
+
   constructor(routeConfig: RouteConfig, ctx: Context) {
     Object.assign(this, routeConfig);
     this.balancePolicy ||= 'hash';
@@ -61,12 +62,15 @@ export class Route implements RouteConfig {
       }, this.heartbeat);
     }
   }
+
   isHealthy() {
     return this.connections.length > 0;
   }
+
   getHealthyInfo() {
     return new HealthInfoDto(this.name, this.isHealthy());
   }
+
   send(data: any, session: Session, allConns = this.connections) {
     if (!allConns.length) {
       if (this.bufferAppMessage) {
@@ -96,6 +100,7 @@ export class Route implements RouteConfig {
       });
     }
   }
+
   broadcast(data: any) {
     const message = JSON.stringify(data);
     for (const conn of this.connections) {
@@ -108,6 +113,7 @@ export class Route implements RouteConfig {
       });
     }
   }
+
   getFilteredContext(ctx: Context) {
     const idCtx = ctx.self(this.selfId);
     if (!this.select) {
@@ -115,6 +121,7 @@ export class Route implements RouteConfig {
     }
     return idCtx.select(this.select);
   }
+
   static sessionKeys: (keyof Session)[] = [
     'selfId',
     'guildId',
@@ -125,6 +132,7 @@ export class Route implements RouteConfig {
     'subtype',
     'subsubtype',
   ];
+
   private getSequenceFromSession(sess: Session) {
     const hash = createHash('md5');
     for (const key of Route.sessionKeys) {
@@ -135,6 +143,7 @@ export class Route implements RouteConfig {
     }
     return parseInt(hash.digest('hex'), 16) % 4294967295;
   }
+
   getRelatedConnections(
     sess: Session,
     allConns = this.connections,
@@ -159,6 +168,7 @@ export class Route implements RouteConfig {
         return [];
     }
   }
+
   addConnection(conn: WebSocket) {
     this.connections.push(conn);
     if (!this.bufferAppMessage) {
@@ -170,12 +180,15 @@ export class Route implements RouteConfig {
       this.send(message.data, message.session);
     }
   }
+
   removeConnection(conn: WebSocket) {
     remove(this.connections, conn);
   }
+
   addSendTask(task: SendTask) {
     this.sendQueue.push(task);
   }
+
   fetchSendTask() {
     if (!this.sendQueue.length) {
       return;

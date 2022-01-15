@@ -19,6 +19,7 @@ export class BlankReturnMessageDto implements BlankReturnMessage {
   message: string;
   @ApiProperty({ description: '是否成功' })
   success: boolean;
+
   constructor(statusCode: number, message?: string) {
     this.statusCode = statusCode;
     this.message = message || 'success';
@@ -32,9 +33,11 @@ export class BlankReturnMessageDto implements BlankReturnMessage {
 
 export class ReturnMessageDto<T>
   extends BlankReturnMessageDto
-  implements ReturnMessage<T> {
+  implements ReturnMessage<T>
+{
   @ApiProperty({ description: '返回内容' })
   data?: T;
+
   constructor(statusCode: number, message?: string, data?: T) {
     super(statusCode, message);
     this.data = data;

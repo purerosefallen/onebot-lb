@@ -28,4 +28,5 @@ async function bootstrap() {
     config.get<string>('host') || '::',
   );
 }
+
 bootstrap();

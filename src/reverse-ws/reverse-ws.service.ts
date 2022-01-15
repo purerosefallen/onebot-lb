@@ -9,6 +9,7 @@ export class ReverseWsService extends ConsoleLogger {
   constructor(private meesageService: MessageService) {
     super('reverse-ws');
   }
+
   initializeReverseWs(route: Route, revConfig: ReverseWsConfig) {
     const headers: OutgoingHttpHeaders = {
       'X-Self-ID': route.selfId,
